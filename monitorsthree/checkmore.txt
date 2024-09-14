@@ -1,0 +1,11 @@
+1. marcus is not in the sudoers file.  This incident will be reported.
+
+2. Analyzing .socket files
+
+3. Private SSH -> /var/www/html/cacti/include/vendor/phpseclib/Crypt/RSA.php
+
+4. tr was found in /usr/bin/ctr, you may be able to escalate privileges with it
+
+5. tr was found in /usr/bin/ctr, you may be able to escalate privileges with it
+
+6. MySQL root password crack
